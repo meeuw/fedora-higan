@@ -1,12 +1,11 @@
 Name: higan
-Version: 106
-Release: 2%{?dist}
+Version: 115
+Release: 1%{?dist}
 
 License: GPLv3
 Summary: Emulator
 URL:     http://byuu.org/emulation/higan
-Source:  https://gitlab.com/higan/higan/repository/v%{version}/archive.tar.bz2
-Patch0:  use_sharedpath.patch
+Source:  https://github.com/byuu/higan/archive/v%{version}.tar.gz
 
 BuildRequires: gcc-c++
 BuildRequires: gtk2-devel
@@ -16,8 +15,10 @@ BuildRequires: libX11-devel
 BuildRequires: libXv-devel
 BuildRequires: openal-soft-devel
 BuildRequires: pulseaudio-libs-devel
-BuildRequires: SDL-devel
+BuildRequires: SDL2-devel
 BuildRequires: systemd-devel
+BuildRequires: mesa-libGL-devel
+BuildRequires: alsa-lib-devel
 
 
 %description
@@ -25,7 +26,7 @@ Higan is an emulator.
 
 
 %prep
-%autosetup -n higan-v%{version}-b55783c322a0158d9c192e0e14348fe9b5f76f7e -p1
+%autosetup -p1
 
 sed -i \
         -e "/handle/s#/usr/local/lib#/usr/%{_libdir}#" \
@@ -33,17 +34,17 @@ sed -i \
 
 # fix so that it doesn't build march=native
 sed -i \
-	    -e 's/march=native/march=x86-64/g' \
+        -e 's/march=native/march=x86-64/g' \
         -e 's/^\(flags.*\)/\1 -g/' \
-        higan/GNUmakefile icarus/GNUmakefile
+        luna/GNUmakefile lucia/GNUmakefile
 
 
 %build
-pushd icarus
+pushd lucia
 make %{?_smp_mflags} compiler="$(which g++)" phoenix="gtk" platform="linux"
 popd
 
-pushd higan
+pushd luna
 make %{?_smp_mflags} compiler="$(which g++)" phoenix="gtk" platform="linux" profile="profile_accuracy"
 popd
 
@@ -51,26 +52,38 @@ popd
 %install
 install -d %{buildroot}/%{_datadir}/applications
 
-pushd higan
+pushd luna
 %make_install prefix=%{buildroot}/%{_prefix}
 popd
-pushd icarus
+pushd lucia
 %make_install prefix=%{buildroot}/%{_prefix}
 popd
 
 
 %files
-%{_bindir}/higan
-%{_bindir}/icarus
-%{_datadir}/applications/higan.desktop
-%{_datadir}/applications/icarus.desktop
-%{_datadir}/higan
-%{_datadir}/icarus
-%{_datadir}/icons/higan.png
-%{_datadir}/icons/icarus.png
+%{_bindir}/luna
+%{_bindir}/lucia
+%{_datadir}/applications/luna.desktop
+%{_datadir}/applications/lucia.desktop
+%{_datadir}/luna
+%{_datadir}/lucia
+%{_datadir}/icons/luna.png
+%{_datadir}/icons/lucia.png
 
 
 %changelog
+* Fri Sep 18 2020 Dick Marinus <dick@mrns.nl> - 115-1
+- Update to 115
+
+* Sun May 24 2020 Dick Marinus <dick@mrns.nl> - 110-1
+- Update to 110
+
+* Fri Feb 28 2020 Dick Marinus <dick@mrns.nl> - 107-1
+- Update to 107
+
+* Sat Oct 27 2018 Dick Marinus <dick@mrns.nl> - 106-3
+- Update source (removed rom files)
+
 * Sun Mar 04 2018 Dick Marinus <dick@mrns.nl> - 106-2
 - Change URL, add use_sharedpath patch from Tobias Hansen
 
